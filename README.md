@@ -15,7 +15,7 @@ Verify that CoreDNS pods are pending:
 kubectl -n kube-system get pods
 ```
 
-Deploy Calico CNI:
+Deploy Calico CNI (this file is created from https://projectcalico.docs.tigera.io/v3.19/manifests/calico.yaml by referencing amr Intel registry instead of docker.io):
 ```sh
 sh deploy-calico.sh
 ```
@@ -23,4 +23,12 @@ sh deploy-calico.sh
 New Calico pods as well as CoreDNS pods should be running:
 ```sh
 kubectl -n kube-system get pods
+```
+
+## Build calico Docker container
+
+```sh
+make namespace
+make build
+make run
 ```

@@ -1,0 +1,55 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+
+metadata:
+  name: rad-cluster-role
+
+rules:
+  - apiGroups: ["projectcalico.org"]
+    resources: ["ippools"]
+    verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+
+metadata:
+  name: rad-service-account
+  namespace: smartedge-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+
+metadata:
+  name: rad-cluster-role-binding
+
+roleRef:
+  kind: ClusterRole
+  name: rad-cluster-role
+  apiGroup: rbac.authorization.k8s.io
+
+subjects:
+  - kind: ServiceAccount
+    name: rad-service-account
+    namespace: smartedge-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rad-calico-demo
+  labels:
+    app: rad-calico-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rad-calico-demo
+  template:
+    metadata:
+      labels:
+        app: rad-calico-demo
+    spec:
+      serviceAccountName: rad-service-account
+      containers:
+      - name: rad-calico-demo
+        image: my-calico
+        imagePullPolicy: IfNotPresent
