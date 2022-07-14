@@ -14,9 +14,14 @@ func main() {
 		panic(err.Error())
 	}
 	for {
-		if err := calico.GetIppool(config); err != nil {
+		// if err := calico.GetIppool(config); err != nil {
+		// 	panic(err.Error())
+		// }
+
+		if err := calico.ListBGP(config); err != nil {
 			panic(err.Error())
 		}
+
 		time.Sleep(30 * time.Second)
 	}
 }
