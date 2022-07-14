@@ -18,10 +18,13 @@ func GetIppool(c *rest.Config) error {
 	if err != nil {
 		return err
 	}
-	ipp, err := cs.ProjectcalicoV3().IPPools().Get(context.TODO(), "default-ipv4-ippool", v1.GetOptions{})
+	ipp, err := cs.ProjectcalicoV3().IPPools().List(context.TODO(), v1.ListOptions{})
+	//Get(context.TODO(), "default-ipv4-ippool", v1.GetOptions{})
 	if err != nil {
+		log.Println("Error in cs ProjectcalicoV3 call")
 		return err
 	}
-	log.Printf("Calico IPPools are: %+v", ipp.Spec.CIDR)
+	log.Printf("Calico IPPools ListMeata: %+v", ipp.ListMeta)
+	log.Printf("Calico IPPools Items: %+v", ipp.Items)
 	return nil
 }

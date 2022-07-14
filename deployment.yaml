@@ -7,7 +7,7 @@ metadata:
 rules:
   - apiGroups: ["projectcalico.org"]
     resources: ["ippools"]
-    verbs: ["get"]
+    verbs: ["get","list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
