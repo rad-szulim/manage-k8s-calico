@@ -58,10 +58,6 @@ func GetClient() (client.Client, error) {
 
 // TODO: change client to be a method !!!
 func GetIppool2(c client.Client) error {
-	/*
-		I0715 13:13:01.773906       1 request.go:601] Waited for 1.046536869s due to client-side throttling, not priority and fairness, request: GET:https://10.110.0.1:443/apis/discovery.k8s.io/v1beta1?timeout=32s
-		panic: no matches for kind "IPPool" in version "projectcalico.org/v3"
-	*/
 	pools := &calicoVersion.IPPoolList{}
 	log.Printf("Calico IPPools APIVersion: %+v", pools.APIVersion)
 	log.Printf("Calico IPPools Group: %+v", pools.TypeMeta.GroupVersionKind().Group)
@@ -73,6 +69,8 @@ func GetIppool2(c client.Client) error {
 		return err
 	}
 	log.Printf("Calico IPPools: %+v", pools)
+	log.Printf("Calico Name: %+v", pools.Items[0].Name)
+	log.Printf("Calico CIDR: %+v", pools.Items[0].Spec.CIDR)
 	return nil
 }
 

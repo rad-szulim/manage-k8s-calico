@@ -5,8 +5,8 @@ metadata:
   name: rad-cluster-role
 
 rules:
-  - apiGroups: ["projectcalico.org", "projectcalico.org/v1", "crd.projectcalico.org/v1", "projectcalico.org/v3", "crd.projectcalico.org/v3"]
-    resources: ["ippools", "ippool", "bgpconfigurations", "ippools.crd"]
+  - apiGroups: ["projectcalico.org"]
+    resources: ["ippools"]
     verbs: ["get","list"]
 ---
 apiVersion: v1
