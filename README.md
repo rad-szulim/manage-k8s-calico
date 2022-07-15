@@ -1,6 +1,14 @@
 # manage-k8s-calico
 Use Golang client to interact with Calico CNI deployed to k8s cluster
 
+## Preques:
+
+Issues discovered during investigation
+https://github.com/projectcalico/calico/issues/6108
+
+Install API server:
+https://projectcalico.docs.tigera.io/maintenance/install-apiserver
+
 ## Setup kind cluster
 
 Add latest port mappings to file based on virgo/controller/Contributing.md instructions for kind deployment.

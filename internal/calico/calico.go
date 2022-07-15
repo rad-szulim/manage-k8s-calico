@@ -6,6 +6,8 @@ import (
 
 	calicoVersion "github.com/projectcalico/api/pkg/apis/projectcalico/v3"
 	"github.com/projectcalico/api/pkg/client/clientset_generated/clientset"
+
+	// calicoVersion "github.com/projectcalico/libcalico-go/lib/client"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	rest "k8s.io/client-go/rest"
@@ -42,7 +44,11 @@ func GetIppool(c *rest.Config) error {
 func GetClient() (client.Client, error) {
 	scheme := runtime.NewScheme()
 	calicoVersion.AddToScheme(scheme)
-	kubeconfig := ctrl.GetConfigOrDie()
+	// kubeconfig := ctrl.GetConfigOrDie()
+	kubeconfig, err := ctrl.GetConfig()
+	if err != nil {
+		return nil, err
+	}
 	controllerClient, err := client.New(kubeconfig, client.Options{Scheme: scheme})
 	if err != nil {
 		return nil, err
@@ -52,8 +58,18 @@ func GetClient() (client.Client, error) {
 
 // TODO: change client to be a method !!!
 func GetIppool2(c client.Client) error {
+	/*
+		I0715 13:13:01.773906       1 request.go:601] Waited for 1.046536869s due to client-side throttling, not priority and fairness, request: GET:https://10.110.0.1:443/apis/discovery.k8s.io/v1beta1?timeout=32s
+		panic: no matches for kind "IPPool" in version "projectcalico.org/v3"
+	*/
 	pools := &calicoVersion.IPPoolList{}
-	if err := c.List(context.TODO(), pools, &client.ListOptions{}); err != nil {
+	log.Printf("Calico IPPools APIVersion: %+v", pools.APIVersion)
+	log.Printf("Calico IPPools Group: %+v", pools.TypeMeta.GroupVersionKind().Group)
+	log.Printf("Calico IPPools TypeMeta: %+v", pools.TypeMeta)
+	if err := c.List(context.TODO(), pools,
+		&client.ListOptions{Raw: &v1.ListOptions{
+			ResourceVersion: "0", // 0 for get means any version
+		}}); err != nil {
 		return err
 	}
 	log.Printf("Calico IPPools: %+v", pools)
