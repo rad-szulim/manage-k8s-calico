@@ -1,10 +1,10 @@
-mage -v gen:registryCacheCert
-docker pull amr-cache-registry.caas.intel.com/cache/calico/cni:v3.19.4
-kind load docker-image amr-cache-registry.caas.intel.com/cache/calico/cni:v3.19.4
-docker pull amr-cache-registry.caas.intel.com/cache/calico/pod2daemon-flexvol:v3.19.4
-kind load docker-image amr-cache-registry.caas.intel.com/cache/calico/pod2daemon-flexvol:v3.19.4
-docker pull amr-cache-registry.caas.intel.com/cache/calico/kube-controllers:v3.19.4
-kind load docker-image amr-cache-registry.caas.intel.com/cache/calico/kube-controllers:v3.19.4
-docker pull amr-cache-registry.caas.intel.com/cache/calico/node:v3.19.4
-kind load docker-image amr-cache-registry.caas.intel.com/cache/calico/node:v3.19.4
-kubectl -n kube-system apply -f calico2.yaml
+docker pull calico/cni:v3.23.2
+kind load docker-image calico/cni:v3.23.2
+docker pull calico/pod2daemon-flexvol:v3.23.2
+kind load docker-image calico/pod2daemon-flexvol:v3.23.2
+docker pull calico/kube-controllers:v3.23.2
+kind load docker-image calico/kube-controllers:v3.23.2
+docker pull calico/node:v3.23.2
+kind load docker-image calico/node:v3.23.2
+
+kubectl -n kube-system apply -f https://projectcalico.docs.tigera.io/v3.23/manifests/calico.yaml
