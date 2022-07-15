@@ -12,7 +12,10 @@ func main() {
 		panic(err.Error())
 	}
 	for {
-		if err := calico.GetIppool2(c); err != nil {
+		if err := calico.ListIppool(c); err != nil {
+			panic(err.Error())
+		}
+		if err := calico.ListBGP(c); err != nil {
 			panic(err.Error())
 		}
 		time.Sleep(30 * time.Second)
