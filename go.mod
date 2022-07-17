@@ -3,6 +3,8 @@ module intel/rad-szulim/manage-k8s-calico
 go 1.18
 
 require (
+	github.com/onsi/ginkgo/v2 v2.0.0
+	github.com/onsi/gomega v1.18.1
 	github.com/projectcalico/api v0.0.0-20220505235232-ce7a5122e146
 	k8s.io/apimachinery v0.24.2
 	sigs.k8s.io/controller-runtime v0.12.3

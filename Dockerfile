@@ -2,7 +2,6 @@ FROM amr-registry.caas.intel.com/sed-registry/library/golang:1.17 As build
 WORKDIR /workspace
 # Copy go.mod, go.sum files and download deps
 COPY go.mod go.sum ./
-# COPY go.mod ./
 RUN go mod download
 
 # Copy sources to the working directory

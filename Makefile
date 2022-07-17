@@ -15,3 +15,6 @@ run:
 clean:
 	kubectl -n smartedge-system delete deployment rad-calico-demo
 	kubectl delete ns smartedge-system
+
+test:
+	ginkgo --randomize-all --randomize-suites -race -v -r -tags unit .

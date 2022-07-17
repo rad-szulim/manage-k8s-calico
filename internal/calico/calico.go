@@ -2,15 +2,19 @@ package calico
 
 import (
 	"context"
-	"log"
 
 	calicoVersion "github.com/projectcalico/api/pkg/apis/projectcalico/v3"
+	"github.com/projectcalico/api/pkg/lib/numorstring"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+type ClientManager struct {
+	Client client.Client
+}
 
 func GetClient() (client.Client, error) {
 	scheme := runtime.NewScheme()
@@ -26,32 +30,55 @@ func GetClient() (client.Client, error) {
 	return controllerClient, nil
 }
 
-// TODO: change client to be a method for testing purposes!!!
-func ListIppool(c client.Client) error {
+func (c ClientManager) ListIppool(ctx context.Context) ([]calicoVersion.IPPool, error) {
 	pools := &calicoVersion.IPPoolList{}
-	log.Printf("Calico IPPools APIVersion: %+v", pools.APIVersion)
-	log.Printf("Calico IPPools Group: %+v", pools.TypeMeta.GroupVersionKind().Group)
-	log.Printf("Calico IPPools TypeMeta: %+v", pools.TypeMeta)
-	if err := c.List(context.TODO(), pools,
+	if err := c.Client.List(ctx, pools,
 		&client.ListOptions{Raw: &v1.ListOptions{
 			ResourceVersion: "0", // 0 for get means any version
 		}}); err != nil {
+		return nil, err
+	}
+	return pools.Items, nil
+}
+
+func (c ClientManager) ListBGP(ctx context.Context) ([]calicoVersion.BGPConfiguration, error) {
+	bgp := &calicoVersion.BGPConfigurationList{}
+	if err := c.Client.List(ctx, bgp,
+		&client.ListOptions{Raw: &v1.ListOptions{
+			ResourceVersion: "0", // 0 for get means any version
+		}}); err != nil {
+		return nil, err
+	}
+	return bgp.Items, nil
+}
+
+func (c ClientManager) CreateBGP(ctx context.Context,
+	name, asnumber string, subnets []string) error {
+	cfg := calicoVersion.NewBGPConfiguration()
+
+	asnum, err := numorstring.ASNumberFromString(asnumber)
+	if err != nil {
 		return err
 	}
-	log.Printf("Calico IPPools: %+v", pools)
-	log.Printf("Calico Name: %+v", pools.Items[0].Name)
-	log.Printf("Calico CIDR: %+v", pools.Items[0].Spec.CIDR)
+	cfg.Name = name
+	cfg.Spec.ASNumber = &asnum
+	cidr := make([]calicoVersion.ServiceClusterIPBlock, len(subnets))
+	for i, oneCidr := range subnets {
+		cidr[i].CIDR = oneCidr
+	}
+	cfg.Spec.ServiceClusterIPs = cidr
+
+	if err := c.Client.Create(ctx, cfg, &client.CreateOptions{}); err != nil {
+		return err
+	}
 	return nil
 }
 
-func ListBGP(c client.Client) error {
-	bgp := &calicoVersion.BGPConfigurationList{}
-	if err := c.List(context.TODO(), bgp,
-		&client.ListOptions{Raw: &v1.ListOptions{
-			ResourceVersion: "0", // 0 for get means any version
-		}}); err != nil {
+func (c ClientManager) DeleteBGP(ctx context.Context,
+	bgp *calicoVersion.BGPConfiguration) error {
+	if err := c.Client.Delete(ctx, bgp,
+		&client.DeleteOptions{}); err != nil {
 		return err
 	}
-	log.Printf("Calico BGPConfigurationList: %+v", bgp)
 	return nil
 }

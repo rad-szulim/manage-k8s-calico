@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"intel/rad-szulim/manage-k8s-calico/internal/calico"
+	"log"
 	"time"
 )
 
@@ -11,13 +13,18 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
+	cli := calico.ClientManager{Client: c}
 	for {
-		if err := calico.ListIppool(c); err != nil {
+		pools, err := cli.ListIppool(context.TODO())
+		if err != nil {
 			panic(err.Error())
 		}
-		if err := calico.ListBGP(c); err != nil {
+		log.Printf("Calico IPpools %v \n", pools)
+		bgp, err := cli.ListBGP(context.TODO())
+		if err != nil {
 			panic(err.Error())
 		}
+		log.Printf("Calico BGP Config %v \n", bgp)
 		time.Sleep(30 * time.Second)
 	}
 }

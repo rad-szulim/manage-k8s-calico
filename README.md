@@ -22,7 +22,7 @@ Verify that CoreDNS pods are in `Pending` state:
 kubectl -n kube-system get pods
 ```
 
-Deploy Calico CNI (this file is created from https://projectcalico.docs.tigera.io/v3.23/manifests/calico.yaml by referencing amr Intel registry instead of docker.io):
+Deploy Calico CNI:
 ```sh
 sh deploy-calico.sh
 ```
@@ -77,7 +77,7 @@ The pod should be in `Running` state:
 kubectl -n calico-apiserver get pods
 ```
 
-## Build calico Docker container
+## Build Calico Docker container
 
 Deploy Docker container
 ```sh
@@ -86,11 +86,13 @@ make build
 make run
 ```
 
-Verify that there are not errors in the log of the container:
+Verify that there are no errors in the log of the container:
 ```sh
 kubectl -n smartedge-system get pods
 kubectl -n smartedge-system logs <pod-id>
 ```
+
+The code running in the container is interacting with Calico using Golang client.
 
 Remove deployment:
 ```sh
