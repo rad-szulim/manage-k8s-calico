@@ -62,11 +62,11 @@ func (c ClientManager) CreateBGP(ctx context.Context,
 	}
 	cfg.Name = name
 	cfg.Spec.ASNumber = &asnum
-	cidr := make([]calicoVersion.ServiceClusterIPBlock, len(subnets))
+	cidrs := make([]calicoVersion.ServiceClusterIPBlock, len(subnets))
 	for i, oneCidr := range subnets {
-		cidr[i].CIDR = oneCidr
+		cidrs[i].CIDR = oneCidr
 	}
-	cfg.Spec.ServiceClusterIPs = cidr
+	cfg.Spec.ServiceClusterIPs = cidrs
 
 	if err := c.Client.Create(ctx, cfg, &client.CreateOptions{}); err != nil {
 		return err
