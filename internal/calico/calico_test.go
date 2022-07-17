@@ -15,25 +15,20 @@ import (
 )
 
 var _ = Describe("Calico k8s test", func() {
-	var f client.WithWatch
-	scheme := runtime.NewScheme()
-	calicoVersion.AddToScheme(scheme)
-	f = fake.NewFakeClientWithScheme(scheme)
-
-	It("Add, Update, Get Calico k8s BGP Configuration", func() {
+	It("Add, Delete, Get Calico k8s BGP Configuration", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		// Create the fake client.
 		By("Setting up fake Calico client for k8s")
-		cli := calico.ClientManager{Client: f}
+		cli := calico.ClientManager{Client: getFakeClient()}
 
-		By("Creating GBP Configuration for the cluster")
+		By("Creating BGP Configuration")
 		err := cli.CreateBGP(ctx, "my-name", "65000", []string{
 			"192.168.100.0/24", "192.168.200.0/24"})
 		Expect(err).ToNot(HaveOccurred())
 
-		By("Reading GBP Configuration for the cluster")
+		By("Listing BGP Configuration")
 		b, err := cli.ListBGP(ctx)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(b).ToNot(BeNil())
@@ -65,5 +60,20 @@ var _ = Describe("Calico k8s test", func() {
 				}),
 			},
 		))
+
+		By("Deleting BGP Configuration")
+		err = cli.DeleteBGP(ctx, "my-name")
+		Expect(err).ToNot(HaveOccurred())
+
+		By("Listing BGP Configuration for the second time")
+		b2, err := cli.ListBGP(ctx)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(b2).To(HaveLen(0))
 	})
 })
+
+func getFakeClient() client.WithWatch {
+	scheme := runtime.NewScheme()
+	calicoVersion.AddToScheme(scheme)
+	return fake.NewFakeClientWithScheme(scheme)
+}

@@ -74,9 +74,10 @@ func (c ClientManager) CreateBGP(ctx context.Context,
 	return nil
 }
 
-func (c ClientManager) DeleteBGP(ctx context.Context,
-	bgp *calicoVersion.BGPConfiguration) error {
-	if err := c.Client.Delete(ctx, bgp,
+func (c ClientManager) DeleteBGP(ctx context.Context, name string) error {
+	cfg := calicoVersion.NewBGPConfiguration()
+	cfg.Name = name
+	if err := c.Client.Delete(ctx, cfg,
 		&client.DeleteOptions{}); err != nil {
 		return err
 	}
