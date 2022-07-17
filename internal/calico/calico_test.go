@@ -29,7 +29,8 @@ var _ = Describe("Calico k8s test", func() {
 		cli := calico.ClientManager{Client: f}
 
 		By("Creating GBP Configuration for the cluster")
-		err := cli.CreateBGP(ctx, "my-name", "65000", []string{"192.168.100.0/24"})
+		err := cli.CreateBGP(ctx, "my-name", "65000", []string{
+			"192.168.100.0/24", "192.168.200.0/24"})
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Reading GBP Configuration for the cluster")
@@ -54,6 +55,9 @@ var _ = Describe("Calico k8s test", func() {
 							cidrFn, Elements{
 								"192.168.100.0/24": MatchFields(IgnoreExtras, Fields{
 									"CIDR": Equal("192.168.100.0/24"),
+								}),
+								"192.168.200.0/24": MatchFields(IgnoreExtras, Fields{
+									"CIDR": Equal("192.168.200.0/24"),
 								}),
 							},
 						),
