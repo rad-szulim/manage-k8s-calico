@@ -15,7 +15,6 @@ import (
 func GetClient() (client.Client, error) {
 	scheme := runtime.NewScheme()
 	calicoVersion.AddToScheme(scheme)
-	// kubeconfig := ctrl.GetConfigOrDie()
 	kubeconfig, err := ctrl.GetConfig()
 	if err != nil {
 		return nil, err

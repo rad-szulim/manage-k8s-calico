@@ -10,14 +10,14 @@ kind delete cluster
 
 ## Setup kind cluster
 
-Add latest port mappings to file based on virgo/controller/Contributing.md instructions for kind deployment.
+If you plan on installing Controller using `mage`, add latest port mappings to file based on virgo/controller/Contributing.md instructions for kind deployment.
 
 Deploy kind cluster disabling the deault CNI:
 ```sh
 sh kind-cluster-no-cni.sh
 ```
 
-Verify that CoreDNS pods are pending:
+Verify that CoreDNS pods are in `Pending` state:
 ```sh
 kubectl -n kube-system get pods
 ```
@@ -27,7 +27,7 @@ Deploy Calico CNI (this file is created from https://projectcalico.docs.tigera.i
 sh deploy-calico.sh
 ```
 
-New Calico pods as well as CoreDNS pods should be running:
+New Calico pods as well as CoreDNS pods should be in `Running` state:
 ```sh
 kubectl -n kube-system get pods
 ```
@@ -43,7 +43,9 @@ Install API server (as demonstrated in https://projectcalico.docs.tigera.io/main
 kubectl create -f apiserver.yaml
 ```
 
-The pod should be in ContainerCreating state:
+Note: please be aware that the prior script was modfied to remove a line with `-v=5` from the script provided by Calico.
+
+The pod should be in `ContainerCreating` state:
 ```sh
 kubectl -n calico-apiserver get pods
 ```
@@ -70,15 +72,27 @@ kubectl patch apiservice v3.projectcalico.org -p \
     "{\"spec\": {\"caBundle\": \"$(kubectl get secret -n calico-apiserver calico-apiserver-certs -o go-template='{{ index .data "apiserver.crt" }}')\"}}"
 ```
 
-The pod should be in Running state:
+The pod should be in `Running` state:
 ```sh
 kubectl -n calico-apiserver get pods
 ```
 
 ## Build calico Docker container
 
+Deploy Docker container
 ```sh
 make namespace
 make build
 make run
+```
+
+Verify that there are not errors in the log of the container:
+```sh
+kubectl -n smartedge-system get pods
+kubectl -n smartedge-system logs <pod-id>
+```
+
+Remove deployment:
+```sh
+make clean
 ```
