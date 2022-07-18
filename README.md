@@ -94,7 +94,19 @@ kubectl -n smartedge-system logs <pod-id>
 
 The code running in the container is interacting with Calico using Golang client.
 
+Check that BGP Config and Peer were setup:
+```sh
+calicoctl get bgpconfig
+calicoctl get bgppeer
+```
+
 Remove deployment:
 ```sh
 make clean
+```
+
+Remove BGP Config and Peer:
+```sh
+calicoctl delete bgpconfig default
+calicoctl delete bgppeer my-peer-1
 ```
