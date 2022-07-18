@@ -19,13 +19,16 @@ var _ = Describe("Calico k8s test", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		// Create the fake client.
 		By("Setting up fake Calico client for k8s")
 		cli := calico.ClientManager{Client: getFakeClient()}
 
-		By("Creating BGP Configuration")
+		By("Creating BGP Configurations")
 		err := cli.CreateBGP(ctx, "my-name", "65000", []string{
 			"192.168.100.0/24", "192.168.200.0/24"})
+		Expect(err).ToNot(HaveOccurred())
+
+		err = cli.CreateBGP(ctx, "my-name-2", "65001", []string{
+			"192.168.101.0/24", "192.168.201.0/24"})
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Listing BGP Configuration")
@@ -58,11 +61,33 @@ var _ = Describe("Calico k8s test", func() {
 						),
 					}),
 				}),
+				"my-name-2": MatchFields(IgnoreExtras, Fields{
+					"ObjectMeta": MatchFields(IgnoreExtras, Fields{
+						"Name": Equal("my-name-2"),
+					}),
+					"Spec": MatchFields(IgnoreExtras, Fields{
+						"ASNumber": PointTo(BeEquivalentTo(65001)),
+						"ServiceClusterIPs": MatchAllElements(
+							cidrFn, Elements{
+								"192.168.101.0/24": MatchFields(IgnoreExtras, Fields{
+									"CIDR": Equal("192.168.101.0/24"),
+								}),
+								"192.168.201.0/24": MatchFields(IgnoreExtras, Fields{
+									"CIDR": Equal("192.168.201.0/24"),
+								}),
+							},
+						),
+					}),
+				}),
 			},
 		))
 
 		By("Deleting BGP Configuration")
 		err = cli.DeleteBGP(ctx, "my-name")
+		Expect(err).ToNot(HaveOccurred())
+
+		By("Deleting 2nd BGP Configuration")
+		err = cli.DeleteBGP(ctx, "my-name-2")
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Listing BGP Configuration for the second time")
