@@ -83,3 +83,41 @@ func (c ClientManager) DeleteBGP(ctx context.Context, name string) error {
 	}
 	return nil
 }
+
+func (c ClientManager) ListPeer(ctx context.Context) ([]calicoVersion.BGPPeer, error) {
+	peer := &calicoVersion.BGPPeerList{}
+	if err := c.Client.List(ctx, peer,
+		&client.ListOptions{Raw: &v1.ListOptions{
+			ResourceVersion: "0", // 0 for get means any version
+		}}); err != nil {
+		return nil, err
+	}
+	return peer.Items, nil
+}
+
+func (c ClientManager) CreatePeer(ctx context.Context,
+	name, asnumber, ip string) error {
+	p := calicoVersion.NewBGPPeer()
+	asnum, err := numorstring.ASNumberFromString(asnumber)
+	if err != nil {
+		return err
+	}
+	p.Name = name
+	p.Spec.ASNumber = asnum
+	p.Spec.PeerIP = ip
+
+	if err := c.Client.Create(ctx, p, &client.CreateOptions{}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c ClientManager) DeletePeer(ctx context.Context, name string) error {
+	p := calicoVersion.NewBGPPeer()
+	p.Name = name
+	if err := c.Client.Delete(ctx, p,
+		&client.DeleteOptions{}); err != nil {
+		return err
+	}
+	return nil
+}
