@@ -16,6 +16,8 @@ type ClientManager struct {
 	Client client.Client
 }
 
+// Get Client returns new k8s cluster client connection ready to interact with
+// Calico API.
 func GetClient() (client.Client, error) {
 	scheme := runtime.NewScheme()
 	calicoVersion.AddToScheme(scheme)
@@ -30,6 +32,7 @@ func GetClient() (client.Client, error) {
 	return controllerClient, nil
 }
 
+// ListIppool lists all Calico IP Pools.
 func (c ClientManager) ListIppool(ctx context.Context) ([]calicoVersion.IPPool, error) {
 	pools := &calicoVersion.IPPoolList{}
 	if err := c.Client.List(ctx, pools,
@@ -41,6 +44,7 @@ func (c ClientManager) ListIppool(ctx context.Context) ([]calicoVersion.IPPool, 
 	return pools.Items, nil
 }
 
+// ListBGP lists Calico BGP Configurations.
 func (c ClientManager) ListBGP(ctx context.Context) ([]calicoVersion.BGPConfiguration, error) {
 	bgp := &calicoVersion.BGPConfigurationList{}
 	if err := c.Client.List(ctx, bgp,
@@ -52,6 +56,7 @@ func (c ClientManager) ListBGP(ctx context.Context) ([]calicoVersion.BGPConfigur
 	return bgp.Items, nil
 }
 
+// CreateBGP creates a Calico BGP Configuration.
 func (c ClientManager) CreateBGP(ctx context.Context,
 	name, asnumber string, subnets []string) error {
 	cfg := calicoVersion.NewBGPConfiguration()
@@ -74,6 +79,7 @@ func (c ClientManager) CreateBGP(ctx context.Context,
 	return nil
 }
 
+// DeleteBGP deletes a Calico BGP Configuration.
 func (c ClientManager) DeleteBGP(ctx context.Context, name string) error {
 	cfg := calicoVersion.NewBGPConfiguration()
 	cfg.Name = name
@@ -84,6 +90,7 @@ func (c ClientManager) DeleteBGP(ctx context.Context, name string) error {
 	return nil
 }
 
+// ListPeer lists all Calico BGP Peers.
 func (c ClientManager) ListPeer(ctx context.Context) ([]calicoVersion.BGPPeer, error) {
 	peer := &calicoVersion.BGPPeerList{}
 	if err := c.Client.List(ctx, peer,
@@ -95,6 +102,7 @@ func (c ClientManager) ListPeer(ctx context.Context) ([]calicoVersion.BGPPeer, e
 	return peer.Items, nil
 }
 
+// CreatePeer creates one Calico BGP Peer.
 func (c ClientManager) CreatePeer(ctx context.Context,
 	name, asnumber, ip string) error {
 	p := calicoVersion.NewBGPPeer()
@@ -112,6 +120,7 @@ func (c ClientManager) CreatePeer(ctx context.Context,
 	return nil
 }
 
+// DeletePeer deletes one Calico BGP Peer.
 func (c ClientManager) DeletePeer(ctx context.Context, name string) error {
 	p := calicoVersion.NewBGPPeer()
 	p.Name = name
