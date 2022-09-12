@@ -2,6 +2,7 @@ package calico
 
 import (
 	"context"
+	"fmt"
 
 	calicoVersion "github.com/projectcalico/api/pkg/apis/projectcalico/v3"
 	"github.com/projectcalico/api/pkg/lib/numorstring"
@@ -36,18 +37,44 @@ func GetClient() (client.Client, error) {
 func (c ClientManager) ListIPPool(ctx context.Context) ([]calicoVersion.IPPool, error) {
 	pools := &calicoVersion.IPPoolList{}
 	if err := c.Client.List(ctx, pools,
-		&client.ListOptions{Raw: &v1.ListOptions{
-			ResourceVersion: "0", // 0 for get means any version
-		}}); err != nil {
+		&client.ListOptions{}); err != nil {
 		return nil, err
 	}
 	return pools.Items, nil
+}
+
+// CreateIPPool adds a Calico IP Pool with the specified name.
+func (c ClientManager) CreateIPPool(ctx context.Context, name string) error {
+	// This method is only used in unit tests.  Default IP Pool is created
+	// when adding Calico as the default CNI.
+	pool := &calicoVersion.IPPool{}
+	pool.ObjectMeta.Name = name
+	return c.Client.Create(ctx, pool,
+		&client.CreateOptions{})
 }
 
 // UpdateIPPool updates specified IP Pool.
 func (c ClientManager) UpdateIPPool(ctx context.Context, ippool *calicoVersion.IPPool) error {
 	return c.Client.Update(ctx, ippool,
 		&client.UpdateOptions{})
+}
+
+// DisableBGPExportForIPPool disables BGP Export for the IP Pool identified by name.
+func (c ClientManager) DisableBGPExportForIPPool(ctx context.Context, name string) error {
+	pools, err := c.ListIPPool(ctx)
+	if err != nil {
+		return err
+	}
+	for _, pool := range pools {
+		if pool.ObjectMeta.Name == name {
+			pool.Spec.DisableBGPExport = true
+			if err := c.UpdateIPPool(ctx, &pool); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("could not find requested IP Pool %s when attemping to Disable BGP export", name)
 }
 
 // ListBGP lists Calico BGP Configurations.

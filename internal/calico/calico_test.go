@@ -96,6 +96,47 @@ var _ = Describe("Calico k8s test", func() {
 		Expect(b2).To(HaveLen(0))
 	})
 
+	It("Add, Get, Update Calico k8s IPPools", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		By("Setting up fake Calico client for k8s")
+		cli := calico.ClientManager{Client: getFakeClient()}
+
+		By("Listing empty IP Pools")
+		pools, err := cli.ListIPPool(ctx)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(pools).To(HaveLen(0))
+
+		By("Creating new IP Pool")
+		const poolName = "some-ip-pool"
+		err = cli.CreateIPPool(ctx, poolName)
+		Expect(err).ToNot(HaveOccurred())
+
+		By("Expecting new IP Pool to have DisableBGPExport=false")
+		pools2, err := cli.ListIPPool(ctx)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(pools2).To(HaveLen(1))
+		Expect(pools2[0].ObjectMeta.Name).To(Equal(poolName))
+		Expect(pools2[0].Spec.DisableBGPExport).To(BeFalse())
+
+		By("Setting DisableBGPExport flag")
+		err = cli.DisableBGPExportForIPPool(ctx, poolName)
+		Expect(err).ToNot(HaveOccurred())
+
+		By("Expecting new IP Pool to have DisableBGPExport=true")
+		pools3, err := cli.ListIPPool(ctx)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(pools3).To(HaveLen(1))
+		Expect(pools3[0].ObjectMeta.Name).To(Equal(poolName))
+		Expect(pools3[0].Spec.DisableBGPExport).To(BeTrue())
+
+		By("Expecting error when providing invalid Pool name in DisableBGPExportForIPPool")
+		err = cli.DisableBGPExportForIPPool(ctx, "invalid-name")
+		Expect(err).To(HaveOccurred())
+		Expect(err).To(MatchError("could not find requested IP Pool invalid-name when attemping to Disable BGP export"))
+	})
+
 	It("Add, Get, Delete Calico k8s BGP Peers", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
