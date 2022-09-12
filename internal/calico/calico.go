@@ -32,8 +32,8 @@ func GetClient() (client.Client, error) {
 	return controllerClient, nil
 }
 
-// ListIppool lists all Calico IP Pools.
-func (c ClientManager) ListIppool(ctx context.Context) ([]calicoVersion.IPPool, error) {
+// ListIPPool lists all Calico IP Pools.
+func (c ClientManager) ListIPPool(ctx context.Context) ([]calicoVersion.IPPool, error) {
 	pools := &calicoVersion.IPPoolList{}
 	if err := c.Client.List(ctx, pools,
 		&client.ListOptions{Raw: &v1.ListOptions{
@@ -42,6 +42,12 @@ func (c ClientManager) ListIppool(ctx context.Context) ([]calicoVersion.IPPool, 
 		return nil, err
 	}
 	return pools.Items, nil
+}
+
+// UpdateIPPool updates specified IP Pool.
+func (c ClientManager) UpdateIPPool(ctx context.Context, ippool *calicoVersion.IPPool) error {
+	return c.Client.Update(ctx, ippool,
+		&client.UpdateOptions{})
 }
 
 // ListBGP lists Calico BGP Configurations.

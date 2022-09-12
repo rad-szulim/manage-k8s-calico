@@ -10,6 +10,7 @@ import (
 // this name must be used when setting up cluster-wide bgp configuration
 // as opposed to node-specific one.
 const defaultBGPConfig = "default"
+const defaultIPPool = "default-ipv4-ippool"
 
 func main() {
 	// creates runtime client for k8s
@@ -19,11 +20,24 @@ func main() {
 	}
 	cli := calico.ClientManager{Client: c}
 	for {
-		pools, err := cli.ListIppool(context.TODO())
+		pools, err := cli.ListIPPool(context.TODO())
 		if err != nil {
 			panic(err.Error())
 		}
-		log.Printf("Calico IPpools %v \n", pools)
+		log.Printf("Calico IPpools %+v \n", pools)
+		for _, pool := range pools {
+			if pool.ObjectMeta.Name == defaultIPPool {
+				pool.Spec.DisableBGPExport = true
+				if err := cli.UpdateIPPool(context.TODO(), &pool); err != nil {
+					panic(err.Error())
+				}
+				pools, err := cli.ListIPPool(context.TODO())
+				if err != nil {
+					panic(err.Error())
+				}
+				log.Printf("Calico IPpools After Update %+v \n", pools)
+			}
+		}
 
 		bgp, err := cli.ListBGP(context.TODO())
 		if err != nil {

@@ -7,7 +7,7 @@ metadata:
 rules:
   - apiGroups: ["projectcalico.org"]
     resources: ["ippools", "bgpconfigurations", "bgppeers"]
-    verbs: ["get", "list", "create"]
+    verbs: ["get", "list", "create", "update"]
 ---
 apiVersion: v1
 kind: ServiceAccount
